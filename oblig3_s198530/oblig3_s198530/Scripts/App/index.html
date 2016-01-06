@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+<html ng-app="App">
+<head>
+    <script src="../LibJS/angular.min.js"></script>
+    <script src="../LibJS/jquery-2.1.1.min.js"></script>
+    <script src="../LibJS/bootstrap.min.js"></script>
+    <link href="../LibJS/bootstrap.min.css" rel="stylesheet" />
+    <script src="faqController.js"></script>
+    <title>FAQ SPA</title>
+</head>
+<body style="background-color:#DFDFDF;">
+    <div class="page-header text-center"><h2 style="color:#2C3E50;">FAQ</h2></div>
+    <div class="row" ng-controller="faqController" style="margin:auto; width: 700px;">
+        <div style="background-color:#34495E; padding:10px;">
+            <button class="btn btn-primary" role="button" style="margin-bottom:5px;" ng-click="showFaqsFunction()">FAQ</button>
+            <button class="btn btn-primary" role="button" style="margin-bottom:5px;" ng-click="getNewQuestions()">Spørsmål sendt inn</button>
+            <button class="btn btn-primary" role="button" ng-repeat="cat in cats | limitTo:5" ng-click="getFAQCategory(cat.id)" style="margin:5px;">{{cat.name}}</button>
+        </div>
+            <div class="text-center" ng-show="loading"><h3>Laster FAQ, vennligst vent ...</h3></div>
+                 <div class="col-sm-12 col-md-12" ng-show="showFAQ" style="background-color:#fff; padding:30px">
+                     <div class="page-header" style="margin-bottom: 0px; border-bottom:1px solid black"><h2>Ofte stilte spørsmål</h2></div>
+                     <div class="panel-group" id="accordion">
+                         <div ng-repeat="faq in faqs | orderBy:'-clicks' | limitTo: 5">
+                             <div class="panel panel-default">
+                                 <a data-toggle="collapse" data-parent="#accordion" data-target="#{{$index}}"
+                                    href="#collapse">
+                                     <div class="panel-heading" style="background-color:#f8f8f8">
+                                         <h4 class="panel-title">
+                                             {{faq.question}}
+                                         </h4>
+                                     </div>
+                                 </a>
+                                 <div id="{{$index}}" class="panel-collapse collapse">
+                                     <div class="panel-body">
+                                         <label id="smallGray">{{faq.category}}</label>
+                                         <br />
+                                         <div>
+                                             {{faq.answer}}
+                                         </div>
+
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+                     </div>
+                     <button class="btn btn-primary" ng-click="questionForm()" ng-show="regKnapp" style="margin-top:10px;">Nytt spørsmål</button>
+                 </div>
+        <div class="col-sm-4 col-sm-offset-2" ng-show="showQuestionForm" style="margin:auto; width:700px; background-color:#fff; padding:30px">
+            <div class="page-header" style="margin-bottom: 5px; border-bottom:1px solid black" ng-show="newQuestionHeader"><h2>Nytt spørsmål</h2></div>
+            <form name="skjema">
+                <div class="form-group">
+                    <label>Navn</label>
+                    <input class="form-control" placeholder="Fornavn Etternavn" name="name" ng-model="name" ng-required="true" ng-pattern="/^[a-zæøåA-ZÆØÅ. \\-]{2,30}$/" />
+                    <p class="label label-info" ng-show="skjema.name.$invalid && skjema.name.$dirty">Skriv inn et lovlig navn</p>
+                </div>
+                <div class="form-group">
+                    <label>Epost</label>
+                    <input class="form-control" placeholder="email@example.com" name="email" ng-model="email" ng-required="true" ng-pattern="/^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/" />
+                    <p class="label label-info" ng-show="skjema.email.$invalid && skjema.email.$dirty">Skriv inn en gyldig epost</p>
+                </div>
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <select class="form-control" ng-model="category">
+                        <option ng-repeat="cat in cats">{{cat.name}}</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tittel</label>
+                    <input class="form-control" placeholder="Tittel" name="title" ng-model="title" ng-required="true" ng-pattern="/^[a-zæøåA-ZÆØÅ. \\-]{2,30}$/" />
+                    <p class="label label-info" ng-show="skjema.title.$invalid && skjema.title.$dirty">Skriv inn en tittel</p>
+                </div>
+                <div class="form-group">
+                    <label>Spørsmål</label>
+                    <textarea  rows="7" placeholder="Skriv inn ditt spørsmål her" class="form-control" ng-minlength="10" ng-maxlength="200" style="resize: none" name="question" ng-model="question" ng-required="true"></textarea>
+                    <p class="label label-info" ng-show="skjema.question.$invalid && skjema.question.$dirty">Skriv inn ditt spørsmål</p>
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary" ng-click="addFAQ()" ng-disabled="skjema.$invalid" ng-show="sendBtn">Send</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-12 col-sm-12" ng-show="sentQuestion" style="background-color:#2ECC71; margin-top:20px;">
+            <div class="page-header" style="color:#fff;"><h2>Vi tar hånd om spørsmålet så fort vi kan</h2></div>
+        </div>
+        <div ng-show="categoryfaq" ng-repeat="faqs in faqsfromcats" style="background-color:#fff; padding:10px">
+            <table class="table  panel panel-default">
+                <thead>
+                    <tr>
+                        <th>Kategori</th>
+                        <th>Spørsmål</th>
+                        <th>Svar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="rows">
+                        <td>{{faqs.category}}</td>
+                        <td>{{faqs.question}}</td>
+                        <td>{{faqs.answer}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="col-md-12 col-sm-12" ng-show="show_new_questions" style="background-color:#fff; padding:30px">
+            <hr style="background-color:#d7d7d7; height: 1px" />
+            <table class="table  panel panel-default">
+                <thead>
+                    <tr>
+                        <th>Kategori</th>
+                        <th>Spørsmål</th>
+                        <th>Svar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="rows" ng-repeat="unanswer in unanswered">
+                        <td>{{unanswer.Category}}</td>
+                        <td>{{unanswer.Question}}</td>
+                        <td><button class="btn btn-primary">Svar</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+     </div>
+        
+
+</body>
+</html>
